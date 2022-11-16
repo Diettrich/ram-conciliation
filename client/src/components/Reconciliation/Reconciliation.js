@@ -53,24 +53,6 @@ function Reconciliation() {
 
         formData.append("file", file);
 
-        // fetch("http://localhost:4000/api/upload", {
-        //     method: "POST",
-        //     body: formData,
-        // })
-        //     .then((response) => {
-        //         console.log(response);
-        //         response.json();
-        //     })
-        //     .then((data) => {
-        //         console.log(data);
-        //     })
-        //     .then(() => {
-        //         e.target.value = null;
-        //     })
-        //     .catch((error) => {
-        //         console.log(error);
-        //     });
-
         axios
             .post("http://localhost:4000/api/upload", formData)
             .then((res) => {
@@ -186,8 +168,11 @@ function Reconciliation() {
                                                 },
                                             }}
                                         >
+                                            <TableCell>
+                                                {row.issue_date}
+                                            </TableCell>
                                             <TableCell>{row.PNR}</TableCell>
-                                            <TableCell>{row.Entité} </TableCell>
+                                            <TableCell>{row.Entite} </TableCell>
                                             <TableCell>
                                                 {row.AmountALTEA}
                                             </TableCell>

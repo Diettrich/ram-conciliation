@@ -64,33 +64,39 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
         .on("header", (headers) => {
             const isValid = validateCSVHeader(headers);
             if (!isValid) {
+                new Error("Invalid CSV file");
+            }
+        })
+        .then((jsonObj) => {
+            jsonObj = jsonObj.map((obj) => {
+                obj.Entite = obj.Entité;
+                delete obj.Entité;
+                return obj;
+            });
+
+            console.log("here ---- ", jsonObj, " ---- here");
+            knexInstance("Reconciliation")
+                .insert(jsonObj)
+                .then(() => {
+                    res.status(200).json({
+                        status: "success",
+                        message: "fichier CSV importé avec succès",
+                    });
+                });
+        })
+        .catch((error) => {
+            console.error(error);
+            if (error.message === "Invalid CSV file") {
                 res.status(400).json({
                     status: "error",
                     message: "fichier CSV invalide",
                 });
-            }
-        })
-        .then((jsonObj) => {
-            try {
-                console.log("here ---- ", jsonObj, " ---- here");
-                // knexInstance("Reconciliation")
-                //     .insert(jsonObj)
-                //     .then(() => {
-                res.status(200).json({
-                    status: "success",
-                    message: "fichier CSV importé avec succès",
+            } else {
+                res.status(500).json({
+                    status: "error",
+                    message: "erreur interne",
                 });
-                // });
-            } catch (error) {
-                console.error(error);
             }
-        })
-        .catch((error) => {
-            console.error(error);
-            res.status(500).json({
-                status: "error",
-                message: "erreur interne",
-            });
         });
 });
 
