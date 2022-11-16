@@ -22,13 +22,30 @@ import TopBar from "../TopBar";
 import { Box } from "@mui/system";
 
 function Reconciliation() {
-    const [age, setAge] = useState("");
+    const [filter, setFilter] = useState({
+        canal: "",
+        type: "",
+        dateDebut: undefined,
+        dateFin: undefined,
+    });
+
     const [uploadMessage, setUploadMessage] = useState("");
     const [reconciliationData, setReconciliationData] = useState([]);
     const inputFile = useRef(null);
 
     const handleChange = (event) => {
-        setAge(event.target.value);
+        setFilter({
+            ...filter,
+            [event.target.name]: event.target.value,
+        });
+    };
+
+    const handleCalendarChange = (value) => {
+        setFilter({
+            ...filter,
+            dateDebut: value[0],
+            dateFin: value[1],
+        });
     };
 
     const handleFileInput = () => {
@@ -70,7 +87,7 @@ function Reconciliation() {
         <>
             <TopBar />
             <Container fixed>
-                <Box sx={{ display: "flex", marginTop: 8, gap: 8 }}>
+                <Box sx={{ display: "flex", my: 8, gap: 8 }}>
                     <Box sx={{ flexBasis: "300px" }}>
                         <Box>
                             <Button
@@ -98,13 +115,15 @@ function Reconciliation() {
                                 <Select
                                     labelId="canal-select-label"
                                     id="canal-select"
-                                    value={age}
+                                    name="canal"
+                                    value={filter.canal}
                                     label="Canal"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    <MenuItem value="Ventes">Ventes</MenuItem>
+                                    <MenuItem value="Remboursement">
+                                        Remboursement
+                                    </MenuItem>
                                 </Select>
                             </FormControl>
                         </Box>
@@ -117,19 +136,22 @@ function Reconciliation() {
                                 <Select
                                     labelId="type-select-label"
                                     id="type-select"
-                                    value={age}
+                                    name="type"
+                                    value={filter.type}
                                     label="Type de Réconciliation"
                                     onChange={handleChange}
                                 >
-                                    <MenuItem value={10}>Ten</MenuItem>
-                                    <MenuItem value={20}>Twenty</MenuItem>
-                                    <MenuItem value={30}>Thirty</MenuItem>
+                                    <MenuItem value="CMI">CMI</MenuItem>
+                                    <MenuItem value="OGONE">OGONE</MenuItem>
                                 </Select>
                             </FormControl>
                         </Box>
 
                         <Box sx={{ mt: 6 }}>
-                            <DateRangePicker />
+                            <InputLabel id="type-select-label">
+                                Date de Réconciliation:
+                            </InputLabel>
+                            <DateRangePicker onChange={handleCalendarChange} />
                         </Box>
                         <Box sx={{ mt: 6 }}>
                             <Button
