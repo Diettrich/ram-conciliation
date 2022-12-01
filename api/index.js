@@ -64,24 +64,37 @@ app.post("/api/reconciliation", async (req, res) => {
                 new Date(req.body.dateFin).toISOString().split("T")[0],
             ]);
         }
-        if (req.body.canal.APP) {
-            query.where("canal", "APP");
+        // if (req.body.canal.APP) {
+        //     query.where("canal", "APP");
+        // }
+        // if (req.body.canal.OGONE) {
+        //     query.where("canal", "OGONE");
+        // }
+        // if (req.body.canal.CMI) {
+        //     query.where("canal", "CMI");
+        // }
+        // if (req.body.canal.Altea) {
+        //     query.where("canal", "Altea");
+        // }
+        // if (req.body.canal.Binga) {
+        //     query.where("canal", "Binga");
+        // }
+        // if (req.body.canal.Fatourati) {
+        //     query.where("canal", "Fatourati");
+        // }
+
+        const canals = [];
+
+        Object.keys(req.body.canal).forEach((key) => {
+            if (req.body.canal[key]) {
+                canals.push(key);
+            }
+        });
+
+        if (canals.length > 0) {
+            query.where("canal", "in", canals);
         }
-        if (req.body.canal.OGONE) {
-            query.where("canal", "OGONE");
-        }
-        if (req.body.canal.CMI) {
-            query.where("canal", "CMI");
-        }
-        if (req.body.canal.Altea) {
-            query.where("canal", "Altea");
-        }
-        if (req.body.canal.Binga) {
-            query.where("canal", "Binga");
-        }
-        if (req.body.canal.Fatourati) {
-            query.where("canal", "Fatourati");
-        }
+
         const result = await query;
 
         // console.log(result);
