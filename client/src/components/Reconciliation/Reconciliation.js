@@ -27,12 +27,13 @@ import { Box } from "@mui/system";
 function Reconciliation() {
     const [filter, setFilter] = useState({
         canal: {
-            APP: false,
-            OGONE: false,
-            CMI: false,
             Altea: false,
+            APP: false,
             Binga: false,
+            CMI: false,
             Fatourati: false,
+            OGONE: false,
+            Thunes: false,
         },
         type: {
             rembourcement: false,

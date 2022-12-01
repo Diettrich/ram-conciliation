@@ -46,26 +46,7 @@ app.post("/api/reconciliation", async (req, res) => {
     console.log("get reconciliation");
     console.log(req.body);
 
-    // body like:
-    // {
-    //     canal: {
-    //       APP: false,
-    //       OGONE: false,
-    //       CMI: false,
-    //       Altea: false,
-    //       Binga: false,
-    //       Fatourati: false
-    //     },
-    //     type: { rembourcement: false, vente: false },
-    //     dateDebut: '2022-12-01T13:20:33.243Z',
-    //     dateFin: '2023-01-31T13:20:33.243Z'
-    //   }
     try {
-        // const result = await knexInstance.select().from("Réconciliation");
-        // const result = await knexInstance
-        //     .select()
-        //     .from("Réconciliation")
-        //     .where("type",
         const query = knexInstance.select().from("Réconciliation");
         if (req.body.type.rembourcement || req.body.type.vente) {
             if (req.body.type.rembourcement && req.body.type.vente) {
@@ -78,8 +59,9 @@ app.post("/api/reconciliation", async (req, res) => {
         }
         if (req.body.dateDebut && req.body.dateFin) {
             query.whereBetween("PAYDATE", [
-                req.body.dateDebut,
-                req.body.dateFin,
+                // convert to sql date
+                new Date(req.body.dateDebut).toISOString().split("T")[0],
+                new Date(req.body.dateFin).toISOString().split("T")[0],
             ]);
         }
         if (req.body.canal.APP) {
