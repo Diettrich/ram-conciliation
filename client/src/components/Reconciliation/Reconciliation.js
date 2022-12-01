@@ -1,19 +1,22 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import axios from "axios";
 import {
     Button,
+    Checkbox,
     Container,
     FormControl,
+    FormControlLabel,
     InputLabel,
-    MenuItem,
+    // MenuItem,
     Paper,
-    Select,
+    // Select,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
+    Typography,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { DateRangePicker } from "rsuite";
@@ -23,8 +26,18 @@ import { Box } from "@mui/system";
 
 function Reconciliation() {
     const [filter, setFilter] = useState({
-        canal: "",
-        type: "",
+        canal: {
+            APP: false,
+            OGONE: false,
+            CMI: false,
+            Altea: false,
+            Binga: false,
+            Fatourati: false,
+        },
+        type: {
+            rembourcement: false,
+            vente: false,
+        },
         dateDebut: undefined,
         dateFin: undefined,
     });
@@ -33,18 +46,65 @@ function Reconciliation() {
     const [reconciliationData, setReconciliationData] = useState([]);
     const inputFile = useRef(null);
 
-    const handleChange = (event) => {
+    // const handleChange = (event) => {
+    //     console.log(
+    //         event.target.name,
+    //         event.target.value,
+    //         !filter[event.target.name]
+    //     );
+    //     setFilter({
+    //         ...filter,
+    //         [event.target.name]: {
+    //             ...filter.canal,
+    //             [event.target.value]: !filter.canal[event.target.value],
+    //         },
+    //     });
+    // };
+    const handleChange = useCallback(
+        (event) => {
+            if (event.target.name === "canal") {
+                setFilter({
+                    ...filter,
+                    canal: {
+                        ...filter.canal,
+                        [event.target.value]: !filter.canal[event.target.value],
+                    },
+                });
+            }
+            if (event.target.name === "type") {
+                setFilter({
+                    ...filter,
+                    type: {
+                        ...filter.type,
+                        [event.target.value]: !filter.type[event.target.value],
+                    },
+                });
+            }
+        },
+        [filter]
+    );
+
+    const handleResetFilter = () => {
         setFilter({
-            ...filter,
-            [event.target.name]: event.target.value,
+            canal: {
+                APP: false,
+                OGONE: false,
+                CMI: false,
+                Altea: false,
+                Binga: false,
+                Fatourati: false,
+            },
+            type: "",
+            dateDebut: undefined,
+            dateFin: undefined,
         });
     };
 
     const handleCalendarChange = (value) => {
         setFilter({
             ...filter,
-            dateDebut: value[0],
-            dateFin: value[1],
+            dateDebut: value ? value[0] : undefined,
+            dateFin: value ? value[1] : undefined,
         });
     };
 
@@ -52,9 +112,23 @@ function Reconciliation() {
         inputFile.current.click();
     };
 
+    // const handleGetReconciliation = () => {
+    //     axios
+    //         .get("http://localhost:4000/api/reconciliation")
+    //         .then((res) => {
+    //             console.log(res);
+    //             setReconciliationData(res.data.result);
+    //         })
+    //         .catch((err) => {
+    //             console.log(err);
+    //         });
+    // };
+
     const handleGetReconciliation = () => {
+        console.log(filter);
+
         axios
-            .get("http://localhost:4000/api/reconciliation")
+            .post("http://localhost:4000/api/reconciliation", filter)
             .then((res) => {
                 console.log(res);
                 setReconciliationData(res.data.result);
@@ -109,10 +183,8 @@ function Reconciliation() {
 
                         <Box sx={{ minWidth: 120, mt: 6 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="canal-select-label">
-                                    Canal
-                                </InputLabel>
-                                <Select
+                                <Typography>Type de Réconciliation</Typography>
+                                {/* <Select
                                     labelId="canal-select-label"
                                     id="canal-select"
                                     name="canal"
@@ -124,26 +196,49 @@ function Reconciliation() {
                                     <MenuItem value="Remboursement">
                                         Remboursement
                                     </MenuItem>
-                                </Select>
+                                </Select> */}
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={filter.type.rembourcement}
+                                            onChange={handleChange}
+                                            name="type"
+                                            value="rembourcement"
+                                        />
+                                    }
+                                    label="Remboursement"
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={filter.type.vente}
+                                            onChange={handleChange}
+                                            name="type"
+                                            value="vente"
+                                        />
+                                    }
+                                    label="Vente"
+                                />
                             </FormControl>
                         </Box>
 
                         <Box sx={{ minWidth: 120, mt: 6 }}>
                             <FormControl fullWidth>
-                                <InputLabel id="type-select-label">
-                                    Type de Réconciliation
-                                </InputLabel>
-                                <Select
-                                    labelId="type-select-label"
-                                    id="type-select"
-                                    name="type"
-                                    value={filter.type}
-                                    label="Type de Réconciliation"
-                                    onChange={handleChange}
-                                >
-                                    <MenuItem value="CMI">CMI</MenuItem>
-                                    <MenuItem value="OGONE">OGONE</MenuItem>
-                                </Select>
+                                <Typography>Canal de Réconciliation</Typography>
+                                {Object.keys(filter.canal).map((canal) => (
+                                    <FormControlLabel
+                                        key={canal}
+                                        control={
+                                            <Checkbox
+                                                checked={filter.canal[canal]}
+                                                onChange={handleChange}
+                                                name="canal"
+                                                value={canal}
+                                            />
+                                        }
+                                        label={canal}
+                                    />
+                                ))}
                             </FormControl>
                         </Box>
 
@@ -161,6 +256,14 @@ function Reconciliation() {
                                 Réconciliation
                             </Button>
                         </Box>
+                        <Box sx={{ mt: 6 }}>
+                            <Button
+                                variant="outlined"
+                                onClick={handleResetFilter}
+                            >
+                                Réinitialiser les filtres
+                            </Button>
+                        </Box>
                     </Box>
                     <Box sx={{ flex: 1 }}>
                         <TableContainer component={Paper}>
@@ -170,27 +273,34 @@ function Reconciliation() {
                             >
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell>issue_date</TableCell>
+                                        <TableCell>date de paiement</TableCell>
                                         <TableCell>PNR</TableCell>
                                         <TableCell>Entité</TableCell>
-                                        <TableCell>AmountALTEA</TableCell>
+                                        <TableCell>Montant</TableCell>
+                                        <TableCell>Devise</TableCell>
+                                        <TableCell>Canal</TableCell>
+                                        <TableCell>Total</TableCell>
+                                        <TableCell>Ecart</TableCell>
+                                        <TableCell>type</TableCell>
+                                        {/* <TableCell>AmountALTEA</TableCell>
                                         <TableCell>DeviceALTEA</TableCell>
                                         <TableCell>MtCanal</TableCell>
                                         <TableCell>DeviseCanal</TableCell>
-                                        <TableCell>Ecart</TableCell>
+                                        <TableCell>Ecart</TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {reconciliationData.map((row) => (
+                                    {reconciliationData.map((row, index) => (
                                         <TableRow
-                                            key={row.issue_date}
+                                            key={index}
                                             sx={{
-                                                "&:last-child td, &:last-child th": {
-                                                    border: 0,
-                                                },
+                                                "&:last-child td, &:last-child th":
+                                                    {
+                                                        border: 0,
+                                                    },
                                             }}
                                         >
-                                            <TableCell>
+                                            {/* <TableCell>
                                                 {row.issue_date}
                                             </TableCell>
                                             <TableCell>{row.PNR}</TableCell>
@@ -205,7 +315,20 @@ function Reconciliation() {
                                             <TableCell>
                                                 {row.DeviseCanal}
                                             </TableCell>
-                                            <TableCell>{row.Ecart}</TableCell>
+                                            <TableCell>{row.Ecart}</TableCell> */}
+                                            <TableCell>{row.PAYDATE}</TableCell>
+                                            <TableCell>{row.PNR}</TableCell>
+                                            <TableCell>{row.Entité} </TableCell>
+                                            <TableCell>
+                                                {row.Amount_Canal}
+                                            </TableCell>
+                                            <TableCell>
+                                                {row.Devise_Canal}
+                                            </TableCell>
+                                            <TableCell>{row.Canal}</TableCell>
+                                            <TableCell>{row.Total}</TableCell>
+                                            <TableCell>{row.ecart}</TableCell>
+                                            <TableCell>{row.type}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>

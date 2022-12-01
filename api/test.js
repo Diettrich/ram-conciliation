@@ -27,6 +27,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+async function getDta() {
+    console.log("get reconciliation");
+    try {
+        const result = await knexInstance.select().from("Réconciliation");
+        console.log(result);
+    } catch (err) {
+        console.log(err);
+    }
+}
+getDta();
+
 function validateCSVHeader(headers) {
     // issue_date,PNR,Entité,AmountALTEA,DeviceALTEA,MtCanal,DeviseCanal,Ecart
     return (
@@ -42,67 +53,11 @@ function validateCSVHeader(headers) {
     );
 }
 
-app.post("/api/reconciliation", async (req, res) => {
+app.get("/api/reconciliation", async (req, res) => {
     console.log("get reconciliation");
-    console.log(req.body);
-
-    // body like:
-    // {
-    //     canal: {
-    //       APP: false,
-    //       OGONE: false,
-    //       CMI: false,
-    //       Altea: false,
-    //       Binga: false,
-    //       Fatourati: false
-    //     },
-    //     type: { rembourcement: false, vente: false },
-    //     dateDebut: '2022-12-01T13:20:33.243Z',
-    //     dateFin: '2023-01-31T13:20:33.243Z'
-    //   }
     try {
-        // const result = await knexInstance.select().from("Réconciliation");
-        // const result = await knexInstance
-        //     .select()
-        //     .from("Réconciliation")
-        //     .where("type",
-        const query = knexInstance.select().from("Réconciliation");
-        if (req.body.type.rembourcement || req.body.type.vente) {
-            if (req.body.type.rembourcement && req.body.type.vente) {
-                query.where("type", "in", ["remboursement", "vente"]);
-            } else if (req.body.type.rembourcement) {
-                query.where("type", "remboursement");
-            } else {
-                query.where("type", "vente");
-            }
-        }
-        if (req.body.dateDebut && req.body.dateFin) {
-            query.whereBetween("PAYDATE", [
-                req.body.dateDebut,
-                req.body.dateFin,
-            ]);
-        }
-        if (req.body.canal.APP) {
-            query.where("canal", "APP");
-        }
-        if (req.body.canal.OGONE) {
-            query.where("canal", "OGONE");
-        }
-        if (req.body.canal.CMI) {
-            query.where("canal", "CMI");
-        }
-        if (req.body.canal.Altea) {
-            query.where("canal", "Altea");
-        }
-        if (req.body.canal.Binga) {
-            query.where("canal", "Binga");
-        }
-        if (req.body.canal.Fatourati) {
-            query.where("canal", "Fatourati");
-        }
-        const result = await query;
-
-        // console.log(result);
+        const result = await knexInstance.select().from("reconciliation");
+        console.log(result);
         res.status(200).json({
             status: "success",
             result,
@@ -157,6 +112,6 @@ app.post("/api/upload", upload.single("file"), (req, res) => {
         });
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
-});
+// app.listen(port, () => {
+//     console.log(`Example app listening on port ${port}`);
+// });
