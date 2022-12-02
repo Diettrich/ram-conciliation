@@ -18,11 +18,53 @@ import {
     TableRow,
     Typography,
 } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { DateRangePicker } from "rsuite";
 
 import TopBar from "../TopBar";
 import { Box } from "@mui/system";
+// fields
+{
+    /* <TableCell>{row.PAYDATE}</TableCell>
+<TableCell>{row.PNR}</TableCell>
+<TableCell>{row.Entité} </TableCell>
+<TableCell>
+    {row.Amount_Canal}
+</TableCell>
+<TableCell>
+    {row.Devise_Canal}
+</TableCell>
+<TableCell>{row.Canal}</TableCell>
+<TableCell>{row.Total}</TableCell>
+<TableCell>{row.ecart}</TableCell>
+<TableCell>{row.type}</TableCell> */
+}
+
+// header names
+{
+    /* <TableCell>date de paiement</TableCell>
+<TableCell>PNR</TableCell>
+<TableCell>Entité</TableCell>
+<TableCell>Montant</TableCell>
+<TableCell>Devise</TableCell>
+<TableCell>Canal</TableCell>
+<TableCell>Total</TableCell>
+<TableCell>Ecart</TableCell>
+<TableCell>type</TableCell> */
+}
+
+const columns = [
+    { field: "PAYDATE", headerName: "date de paiement" },
+    { field: "PNR", headerName: "PNR" },
+    { field: "Entité", headerName: "Entité" },
+    { field: "Amount_Canal", headerName: "Montant" },
+    { field: "Devise_Canal", headerName: "Devise" },
+    { field: "Canal", headerName: "Canal" },
+    { field: "Total", headerName: "Total" },
+    { field: "ecart", headerName: "Ecart" },
+    { field: "type", headerName: "type" },
+];
 
 function Reconciliation() {
     const [filter, setFilter] = useState({
@@ -47,20 +89,6 @@ function Reconciliation() {
     const [reconciliationData, setReconciliationData] = useState([]);
     const inputFile = useRef(null);
 
-    // const handleChange = (event) => {
-    //     console.log(
-    //         event.target.name,
-    //         event.target.value,
-    //         !filter[event.target.name]
-    //     );
-    //     setFilter({
-    //         ...filter,
-    //         [event.target.name]: {
-    //             ...filter.canal,
-    //             [event.target.value]: !filter.canal[event.target.value],
-    //         },
-    //     });
-    // };
     const handleChange = useCallback(
         (event) => {
             if (event.target.name === "canal") {
@@ -113,17 +141,26 @@ function Reconciliation() {
         inputFile.current.click();
     };
 
-    // const handleGetReconciliation = () => {
-    //     axios
-    //         .get("http://localhost:4000/api/reconciliation")
-    //         .then((res) => {
-    //             console.log(res);
-    //             setReconciliationData(res.data.result);
-    //         })
-    //         .catch((err) => {
-    //             console.log(err);
-    //         });
-    // };
+    const getExcelData = () => {
+        axios
+            .post("http://localhost:4000/api/reconciliation/export", filter, {
+                responseType: "blob",
+            })
+            .then((response) => {
+                console.log(response);
+                const url = window.URL.createObjectURL(
+                    new Blob([response.data])
+                );
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", `${Date.now()}.xlsx`);
+                document.body.appendChild(link);
+                link.click();
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    };
 
     const handleGetReconciliation = () => {
         console.log(filter);
@@ -258,6 +295,11 @@ function Reconciliation() {
                             </Button>
                         </Box>
                         <Box sx={{ mt: 6 }}>
+                            <Button variant="outlined" onClick={getExcelData}>
+                                export excel
+                            </Button>
+                        </Box>
+                        <Box sx={{ mt: 6 }}>
                             <Button
                                 variant="outlined"
                                 onClick={handleResetFilter}
@@ -267,7 +309,15 @@ function Reconciliation() {
                         </Box>
                     </Box>
                     <Box sx={{ flex: 1 }}>
-                        <TableContainer component={Paper}>
+                        <div style={{ height: 631, width: "100%" }}>
+                            <DataGrid
+                                rows={reconciliationData}
+                                columns={columns}
+                                pageSize={10}
+                                rowsPerPageOptions={[5]}
+                            />
+                        </div>
+                        {/* <TableContainer component={Paper}>
                             <Table
                                 sx={{ minWidth: 650 }}
                                 aria-label="simple table"
@@ -283,11 +333,6 @@ function Reconciliation() {
                                         <TableCell>Total</TableCell>
                                         <TableCell>Ecart</TableCell>
                                         <TableCell>type</TableCell>
-                                        {/* <TableCell>AmountALTEA</TableCell>
-                                        <TableCell>DeviceALTEA</TableCell>
-                                        <TableCell>MtCanal</TableCell>
-                                        <TableCell>DeviseCanal</TableCell>
-                                        <TableCell>Ecart</TableCell> */}
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -301,22 +346,6 @@ function Reconciliation() {
                                                     },
                                             }}
                                         >
-                                            {/* <TableCell>
-                                                {row.issue_date}
-                                            </TableCell>
-                                            <TableCell>{row.PNR}</TableCell>
-                                            <TableCell>{row.Entite} </TableCell>
-                                            <TableCell>
-                                                {row.AmountALTEA}
-                                            </TableCell>
-                                            <TableCell>
-                                                {row.DeviceALTEA}
-                                            </TableCell>
-                                            <TableCell>{row.MtCanal}</TableCell>
-                                            <TableCell>
-                                                {row.DeviseCanal}
-                                            </TableCell>
-                                            <TableCell>{row.Ecart}</TableCell> */}
                                             <TableCell>{row.PAYDATE}</TableCell>
                                             <TableCell>{row.PNR}</TableCell>
                                             <TableCell>{row.Entité} </TableCell>
@@ -334,7 +363,7 @@ function Reconciliation() {
                                     ))}
                                 </TableBody>
                             </Table>
-                        </TableContainer>
+                        </TableContainer> */}
                     </Box>
                 </Box>
             </Container>
