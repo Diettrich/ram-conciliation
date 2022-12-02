@@ -368,6 +368,7 @@ Use [Tickets]
 go
 IF OBJECT_ID('[dbo].[Réconciliation]') IS NOT NULL DROP TABLE [dbo].[Réconciliation];
 CREATE TABLE [dbo].[Réconciliation](
+    [id] int IDENTITY(1,1),
     [PAYDATE] [datetime] NULL,
     [PNR] [varchar](50) NULL,
     [Entité] [varchar](50) NULL,
